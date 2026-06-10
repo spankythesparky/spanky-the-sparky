@@ -332,7 +332,7 @@ footer{margin-top:30px;padding:64px 0 34px;position:relative;z-index:1;border-to
         <li><span class="dot"></span><div><b>Consulting</b><span>Data centers, construction, and AI adoption.</span></div></li>
       </ul>
       <div class="reveal">
-        <form class="fg" action="https://formspree.io/f/mqeolkbn" method="POST">
+        <form id="contactForm" class="fg" action="https://formspree.io/f/mqeolkbn" method="POST">
           <div class="field"><label for="n">Name</label><input id="n" name="name" required/></div>
           <div class="field"><label for="e">Email</label><input id="e" type="email" name="email" required/></div>
           <div class="field"><label for="c">Company / Brand</label><input id="c" name="company"/></div>
@@ -342,6 +342,13 @@ footer{margin-top:30px;padding:64px 0 34px;position:relative;z-index:1;border-to
           <div class="field full"><label for="m">Message</label><textarea id="m" name="message" required></textarea></div>
           <div class="field full"><button type="submit" class="btn btn-pri" style="align-self:flex-start">Send it <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
         </form>
+        <div id="formThanks" style="display:none;text-align:center;padding:52px 32px;border:1px solid var(--brd);border-radius:20px;background:rgba(255,255,255,.02)">
+          <div style="width:58px;height:58px;margin:0 auto 22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(110deg,var(--ember),var(--spark));box-shadow:0 12px 40px -14px rgba(255,106,13,.9)">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+          <h3 class="grad" style="font-size:28px;margin-bottom:12px">Thank you for the inquiry</h3>
+          <p style="color:var(--muted);font-size:16px;max-width:400px;margin:0 auto">I'll respond back within 24 hours.</p>
+        </div>
         <p class="note">Prefer email? <a href="mailto:hello@spankythesparky.com">hello@spankythesparky.com</a></p>
       </div>
     </div>
@@ -399,4 +406,31 @@ addEventListener('resize',function(){clearTimeout(window._rt);window._rt=setTime
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){setTimeout(wires,60)});
 showView((location.hash||'#home').slice(1));
 addEventListener('load',function(){setTimeout(wires,300)});
+(function(){
+  var cf=document.getElementById('contactForm');
+  if(!cf)return;
+  cf.addEventListener('submit',function(e){
+    e.preventDefault();
+    var btn=cf.querySelector('button[type="submit"]');
+    var orig=btn?btn.innerHTML:'';
+    if(btn){btn.disabled=true;btn.style.opacity='.7';btn.textContent='Sending…';}
+    fetch(cf.action,{method:'POST',body:new FormData(cf),headers:{'Accept':'application/json'}})
+      .then(function(res){
+        if(res.ok){
+          cf.style.display='none';
+          var t=document.getElementById('formThanks');
+          if(t){t.style.display='block';t.scrollIntoView({behavior:'smooth',block:'center'});}
+        }else{
+          res.json().then(function(d){
+            alert((d&&d.errors)?d.errors.map(function(x){return x.message}).join(', '):'Something went wrong. Please email hello@spankythesparky.com.');
+          }).catch(function(){alert('Something went wrong. Please email hello@spankythesparky.com.');});
+          if(btn){btn.disabled=false;btn.style.opacity='';btn.innerHTML=orig;}
+        }
+      })
+      .catch(function(){
+        alert('Network error. Please email hello@spankythesparky.com.');
+        if(btn){btn.disabled=false;btn.style.opacity='';btn.innerHTML=orig;}
+      });
+  });
+})();
 </script></body></html>
