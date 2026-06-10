@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STORM CALL — One feed for every storm roster in North America</title>
+<meta name="description" content="Storm Call aggregates active mutual-aid calls and standby roster directories from IBEW signatory contractors across North America. Built by linemen, for linemen. Free.">
+<meta property="og:title" content="STORM CALL — One feed for every storm roster">
+<meta property="og:description" content="Active storm calls and standby rosters from IBEW signatory contractors. Built for linemen. Free.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;800;900&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0A0A0A;
+    --bg-card: #131313;
+    --bg-elev: #1A1A1A;
+    --line: rgba(255,255,255,0.08);
+    --line-strong: rgba(255,255,255,0.16);
+    --text: #FFFFFF;
+    --text-mute: #A0A0A0;
+    --text-dim: #6B6B6B;
+    --orange: #FF7B1F;
+    --orange-glow: rgba(255,123,31,0.18);
+    --amber: #FACC15;
+    --red: #DC2626;
+    --green: #22C55E;
+    --display: 'Big Shoulders Display', Impact, sans-serif;
+    --body: 'Manrope', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed; top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, var(--orange-glow) 0%, transparent 70%);
+    filter: blur(40px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  main { position: relative; z-index: 1; }
+
+  /* ======================= HEADER ======================= */
+  header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(10,10,10,0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .header-inner {
+    max-width: 1280px; margin: 0 auto;
+    padding: 16px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: 24px;
+    letter-spacing: 0.04em;
+    color: var(--text);
+  }
+  .brand-bolt {
+    width: 22px; height: 22px;
+    color: var(--orange);
+  }
+  .brand-bolt path { fill: currentColor; }
+  .badge-beta {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--orange);
+    background: rgba(255,123,31,0.1);
+    border: 1px solid rgba(255,123,31,0.25);
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  .nav-links {
+    display: flex; align-items: center; gap: 28px;
+    font-family: var(--mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+  .nav-links a {
+    color: var(--text-mute);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--orange); }
+  @media (max-width: 720px) {
+    .nav-links { display: none; }
+  }
+
+  /* ======================= HERO ======================= */
+  .hero {
+    max-width: 1280px; margin: 0 auto;
+    padding: 80px 24px 60px;
+    position: relative;
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 24px;
+  }
+  .hero-eyebrow::before {
+    content: ''; width: 32px; height: 1px; background: var(--orange);
+  }
+  .hero-title {
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: clamp(56px, 11vw, 144px);
+    line-height: 0.88;
+    letter-spacing: -0.01em;
+    margin-bottom: 32px;
+    text-transform: uppercase;
+  }
+  .hero-title .alt { color: var(--orange); }
+  .hero-sub {
+    font-size: clamp(16px, 1.6vw, 19px);
+    color: var(--text-mute);
+    line-height: 1.6;
+    max-width: 640px;
+    margin-bottom: 40px;
+  }
+  .hero-sub strong { color: var(--text); font-weight: 600; }
+  .hero-ctas {
+    display: flex; flex-wrap: wrap; gap: 12px;
+    margin-bottom: 56px;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 16px 28px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+  .btn-primary {
+    background: var(--orange);
+    color: #0A0A0A;
+  }
+  .btn-primary:hover {
+    background: #FFA257;
+    box-shadow: 0 0 32px var(--orange-glow);
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    border-color: var(--line-strong);
+  }
+  .btn-secondary:hover {
+    border-color: var(--orange);
+    color: var(--orange);
+  }
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .hero-stat {
+    padding: 24px 20px 24px 0;
+    border-right: 1px solid var(--line);
+  }
+  .hero-stat:last-child { border-right: none; }
+  .hero-stat-num {
+    font-family: var(--display);
+    font-size: 38px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .hero-stat-num .unit {
+    color: var(--orange);
+    font-size: 24px;
+  }
+  .hero-stat-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  /* ======================= SECTION HEADERS ======================= */
+  section { padding: 80px 24px; }
+  .section-inner { max-width: 1280px; margin: 0 auto; }
+  .section-head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    flex-wrap: wrap; gap: 24px;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  .section-head-left .section-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: clamp(40px, 5vw, 64px);
+    line-height: 0.95;
+    text-transform: uppercase;
+    letter-spacing: -0.005em;
+  }
+  .section-meta {
+    display: flex; align-items: center; gap: 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+  .live-dot {
+    width: 8px; height: 8px;
+    background: var(--red); border-radius: 50%;
+    box-shadow: 0 0 12px var(--red);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+  }
+
+  /* ======================= STORM CALL CARDS ======================= */
+  .calls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 16px;
+  }
+  .call {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--orange);
+    padding: 24px;
+    transition: border-color 0.2s, transform 0.2s;
+    position: relative;
+  }
+  .call:hover {
+    border-left-color: var(--amber);
+    transform: translateY(-2px);
+  }
+  .call-top {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+    gap: 12px;
+  }
+  .call-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--orange);
+    background: rgba(255,123,31,0.1);
+    border: 1px solid rgba(255,123,31,0.25);
+    padding: 4px 8px;
+    border-radius: 3px;
+  }
+  .call-tag.ice { color: #60A5FA; background: rgba(96,165,250,0.1); border-color: rgba(96,165,250,0.25); }
+  .call-tag.tornado { color: var(--amber); background: rgba(250,204,21,0.1); border-color: rgba(250,204,21,0.25); }
+  .call-tag.flood { color: #38BDF8; background: rgba(56,189,248,0.1); border-color: rgba(56,189,248,0.25); }
+  .call-expires {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .call-storm {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-mute);
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .call-company {
+    font-family: var(--display);
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.05;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+  .call-fields {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px;
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+    margin-bottom: 18px;
+  }
+  .call-field-label {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+  .call-field-value {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .call-need {
+    background: rgba(255,255,255,0.03);
+    border: 1px dashed var(--line-strong);
+    padding: 12px;
+    margin-bottom: 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+  }
+  .call-need .need-num { color: var(--orange); font-weight: 700; }
+  .call-cta {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%;
+    padding: 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--line-strong);
+    color: var(--text-mute);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    justify-content: center;
+  }
+  .call-cta:hover {
+    background: var(--orange);
+    color: #0A0A0A;
+    border-color: var(--orange);
+  }
+  .call-cta svg { width: 14px; height: 14px; }
+  .call-progress {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 12px;
+  }
+  .call-progress-bar {
+    flex: 1; height: 4px;
+    background: rgba(255,255,255,0.06);
+    overflow: hidden;
+  }
+  .call-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--orange), var(--amber));
+  }
+
+  /* Disclaimer note for the live calls section */
+  .calls-disclaimer {
+    margin-top: 24px;
+    padding: 14px 18px;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+  .calls-disclaimer strong { color: var(--orange); }
+
+  /* ======================= MAP ======================= */
+  .map-section { background: var(--bg-elev); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .map-wrap {
+    position: relative;
+    background:
+      radial-gradient(circle at 30% 50%, rgba(255,123,31,0.04) 0%, transparent 50%),
+      radial-gradient(circle at 70% 60%, rgba(250,204,21,0.03) 0%, transparent 50%),
+      var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 32px 24px;
+    overflow: hidden;
+  }
+  .map-svg {
+    width: 100%;
+    max-width: 980px;
+    margin: 0 auto;
+    display: block;
+  }
+  .map-svg .land { fill: rgba(255,255,255,0.05); stroke: rgba(255,255,255,0.18); stroke-width: 0.6; }
+  .map-svg .pin {
+    fill: var(--orange);
+    transform-origin: center;
+    animation: pin-pulse 2.4s ease-in-out infinite;
+  }
+  .map-svg .pin-glow { fill: var(--orange); opacity: 0.25; }
+  @keyframes pin-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+  .map-legend {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 24px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-mute);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .legend-dot.orange { background: var(--orange); }
+  .legend-dot.amber { background: var(--amber); }
+
+  /* ======================= ROSTER DIRECTORY ======================= */
+  .roster-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+  .roster {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    padding: 18px;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .roster:hover {
+    border-color: var(--orange);
+    background: rgba(255,123,31,0.04);
+  }
+  .roster-name {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 18px;
+    line-height: 1.1;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .roster-region {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--text-mute);
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+  }
+  .roster-meta {
+    display: flex; gap: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+  }
+  .roster-meta strong { color: var(--orange); font-weight: 700; }
+
+  /* ======================= SIGNUP ======================= */
+  .signup-section { background: var(--bg-elev); border-top: 1px solid var(--line); }
+  .signup-wrap {
+    max-width: 980px; margin: 0 auto;
+  }
+  .signup-tabs {
+    display: flex; gap: 0;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 32px;
+  }
+  .signup-tab {
+    flex: 1;
+    padding: 18px 24px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-mute);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .signup-tab.active {
+    color: var(--orange);
+    border-bottom-color: var(--orange);
+    background: rgba(255,123,31,0.05);
+  }
+  .signup-tab:hover:not(.active) {
+    color: var(--text);
+  }
+  .form-pane { display: none; }
+  .form-pane.active { display: block; }
+  .form-notice {
+    display: flex; align-items: flex-start; gap: 12px;
+    background: rgba(255,123,31,0.07);
+    border: 1px solid rgba(255,123,31,0.25);
+    padding: 14px 18px;
+    margin-bottom: 32px;
+  }
+  .form-notice-icon {
+    flex-shrink: 0;
+    color: var(--orange);
+    margin-top: 2px;
+  }
+  .form-notice-text {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.6;
+    letter-spacing: 0.02em;
+  }
+  .form-notice-text strong { color: var(--orange); font-weight: 700; }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 22px;
+  }
+  .form-group { display: flex; flex-direction: column; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    margin-bottom: 8px;
+  }
+  .form-label .req { color: var(--orange); }
+  .form-input, .form-select, .form-textarea {
+    background: var(--bg);
+    border: 1px solid var(--line-strong);
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 15px;
+    transition: border-color 0.2s, background 0.2s;
+    width: 100%;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    outline: none;
+    border-color: var(--orange);
+    background: rgba(255,123,31,0.03);
+  }
+  .form-textarea { min-height: 100px; resize: vertical; font-family: var(--body); }
+  .form-checkboxes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+  }
+  .form-checkbox {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    background: var(--bg);
+    border: 1px solid var(--line-strong);
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+  }
+  .form-checkbox:has(input:checked) {
+    border-color: var(--orange);
+    color: var(--text);
+    background: rgba(255,123,31,0.05);
+  }
+  .form-checkbox input { accent-color: var(--orange); }
+  .form-submit-row {
+    grid-column: 1 / -1;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 16px;
+    padding-top: 12px;
+    margin-top: 8px;
+    border-top: 1px solid var(--line);
+  }
+  .form-fineprint {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+    line-height: 1.6;
+    max-width: 460px;
+  }
+  .form-submit-btn {
+    background: var(--orange);
+    color: #0A0A0A;
+    border: none;
+    padding: 16px 40px;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .form-submit-btn:hover {
+    background: #FFA257;
+    box-shadow: 0 0 32px var(--orange-glow);
+  }
+  .form-success {
+    display: none;
+    padding: 32px 24px;
+    background: rgba(34,197,94,0.07);
+    border: 1px solid rgba(34,197,94,0.3);
+    text-align: center;
+  }
+  .form-success.show { display: block; }
+  .form-success h3 {
+    font-family: var(--display);
+    font-size: 32px;
+    color: var(--green);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .form-success p {
+    color: var(--text-mute);
+    font-size: 15px;
+  }
+  @media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ======================= WHY SECTION ======================= */
+  .why-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 0;
+    border: 1px solid var(--line);
+  }
+  .why-cell {
+    padding: 32px 28px;
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .why-cell:last-child { border-right: none; }
+  .why-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--orange);
+    letter-spacing: 0.2em;
+    margin-bottom: 16px;
+  }
+  .why-h {
+    font-family: var(--display);
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.1;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+  .why-p {
+    font-size: 14.5px;
+    color: var(--text-mute);
+    line-height: 1.6;
+  }
+
+  /* ======================= FOOTER ======================= */
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 40px 24px;
+    background: var(--bg);
+  }
+  .footer-inner {
+    max-width: 1280px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 16px;
+  }
+  .footer-brand {
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: 18px;
+    letter-spacing: 0.04em;
+    color: var(--text);
+  }
+  .footer-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="#top" class="brand">
+      <svg class="brand-bolt" viewBox="0 0 24 24"><path d="M13 2L3 14h7v8l10-12h-7V2z"/></svg>
+      STORM CALL
+      <span class="badge-beta">BETA</span>
+    </a>
+    <nav class="nav-links">
+      <a href="#calls">Active Calls</a>
+      <a href="#rosters">Roster Directory</a>
+      <a href="#signup">Sign Up</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ======================= HERO ======================= -->
+  <section class="hero">
+    <div class="hero-eyebrow">North America · IBEW Mutual Aid Network</div>
+    <h1 class="hero-title">Storm calls.<br><span class="alt">One feed.</span></h1>
+    <p class="hero-sub">
+      Your roster shouldn't be 47 phone calls and a Facebook group. <strong>Storm Call</strong> aggregates active mutual-aid calls and standby roster directories from IBEW signatory contractors across North America. Built by linemen, for linemen. Free for everyone.
+    </p>
+    <div class="hero-ctas">
+      <a href="#signup-lineman" class="btn btn-primary">Get on the rosters →</a>
+      <a href="#signup-company" class="btn btn-secondary">List your company</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-num">15<span class="unit">+</span></div>
+        <div class="hero-stat-label">Standby rosters</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">5</div>
+        <div class="hero-stat-label">Active calls now</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">24<span class="unit">h</span></div>
+        <div class="hero-stat-label">Auto-refresh window</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">$0</div>
+        <div class="hero-stat-label">Cost to linemen</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= LIVE STORM CALLS ======================= -->
+  <section id="calls">
+    <div class="section-inner">
+      <div class="section-head">
+        <div class="section-head-left">
+          <div class="section-eyebrow">Section 01 · Live</div>
+          <h2 class="section-title">Active storm calls</h2>
+        </div>
+        <div class="section-meta">
+          <span class="live-dot"></span>
+          <span>Live · auto-refresh every 24h</span>
+        </div>
+      </div>
+
+      <div class="calls-grid">
+
+        <!-- CALL 1 -->
+        <article class="call">
+          <div class="call-top">
+            <span class="call-tag">HURRICANE RECOVERY</span>
+            <span class="call-expires">Expires in 20h</span>
+          </div>
+          <div class="call-storm">Hurricane Helene · Western NC grid restoration</div>
+          <div class="call-company">Atlantic Power Restoration LLC</div>
+          <div class="call-fields">
+            <div>
+              <div class="call-field-label">Staging</div>
+              <div class="call-field-value">Asheville, NC</div>
+            </div>
+            <div>
+              <div class="call-field-label">Report</div>
+              <div class="call-field-value">0600 tomorrow</div>
+            </div>
+            <div>
+              <div class="call-field-label">Pay rate</div>
+              <div class="call-field-value">2x scale + per diem</div>
+            </div>
+            <div>
+              <div class="call-field-label">Posted</div>
+              <div class="call-field-value">4 hours ago</div>
+            </div>
+          </div>
+          <div class="call-need">
+            Need: <span class="need-num">30</span> Journeyman Linemen, <span class="need-num">10</span> Operators · CDL-A required, hot stick a plus
+          </div>
+          <a href="#signup-lineman" class="call-cta">
+            Apply via roster
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+          </a>
+        </article>
+
+        <!-- CALL 2 -->
+        <article class="call">
+          <div class="call-top">
+            <span class="call-tag ice">ICE STORM</span>
+            <span class="call-expires">Expires in 12h</span>
+          </div>
+          <div class="call-storm">Winter Storm · Carolinas freeze restoration</div>
+          <div class="call-company">Carolina Mutual Aid Group</div>
+          <div class="call-fields">
+            <div>
+              <div class="call-field-label">Staging</div>
+              <div class="call-field-value">Charlotte, NC</div>
+            </div>
+            <div>
+              <div class="call-field-label">Report</div>
+              <div class="call-field-value">0500 today</div>
+            </div>
+            <div>
+              <div class="call-field-label">Pay rate</div>
+              <div class="call-field-value">1.5x + bunkhouse</div>
+            </div>
+            <div>
+              <div class="call-field-label">Posted</div>
+              <div class="call-field-value">12 hours ago</div>
+            </div>
+          </div>
+          <div class="call-progress">
+            <span>Filled 70%</span>
+            <div class="call-progress-bar"><div class="call-progress-fill" style="width:70%"></div></div>
+          </div>
+          <div class="call-need">
+            Need: <span class="need-num">20</span> Linemen, <span class="need-num">8</span> Groundmen · climbing certs required
+          </div>
+          <a href="#signup-lineman" class="call-cta">
+            Apply via roster
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+          </a>
+        </article>
+
+        <!-- CALL 3 -->
+        <article class="call">
+          <div class="call-top">
+            <span class="call-tag tornado">TORNADO RESPONSE</span>
+            <span class="call-expires">Expires in 16h</span>
+          </div>
+          <div class="call-storm">Spring outbreak · multi-state damage</div>
+          <div class="call-company">Heartland Storm Services Co</div>
+          <div class="call-fields">
+            <div>
+              <div class="call-field-label">Staging</div>
+              <div class="call-field-value">Tulsa, OK</div>
+            </div>
+            <div>
+              <div class="call-field-label">Report</div>
+              <div class="call-field-value">0700 tomorrow</div>
+            </div>
+            <div>
+              <div class="call-field-label">Pay rate</div>
+              <div class="call-field-value">2x + per diem</div>
+            </div>
+            <div>
+              <div class="call-field-label">Posted</div>
+              <div class="call-field-value">8 hours ago</div>
+            </div>
+          </div>
+          <div class="call-need">
+            Need: <span class="need-num">15</span> Linemen, <span class="need-num">5</span> Operators · digger derrick + bucket truck endorsements
+          </div>
+          <a href="#signup-lineman" class="call-cta">
+            Apply via roster
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+          </a>
+        </article>
+
+        <!-- CALL 4 -->
+        <article class="call">
+          <div class="call-top">
+            <span class="call-tag">WIND DAMAGE</span>
+            <span class="call-expires">Expires in 8h</span>
+          </div>
+          <div class="call-storm">Gulf Coast squall line · power restoration</div>
+          <div class="call-company">Coastal Power Cooperative</div>
+          <div class="call-fields">
+            <div>
+              <div class="call-field-label">Staging</div>
+              <div class="call-field-value">Mobile, AL</div>
+            </div>
+            <div>
+              <div class="call-field-label">Report</div>
+              <div class="call-field-value">0530 day after tomorrow</div>
+            </div>
+            <div>
+              <div class="call-field-label">Pay rate</div>
+              <div class="call-field-value">Scale + per diem</div>
+            </div>
+            <div>
+              <div class="call-field-label">Posted</div>
+              <div class="call-field-value">16 hours ago</div>
+            </div>
+          </div>
+          <div class="call-need">
+            Need: <span class="need-num">10</span> Journeyman Linemen
+          </div>
+          <a href="#signup-lineman" class="call-cta">
+            Apply via roster
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+          </a>
+        </article>
+
+        <!-- CALL 5 -->
+        <article class="call">
+          <div class="call-top">
+            <span class="call-tag flood">FLOOD RESPONSE</span>
+            <span class="call-expires">Expires in 22h</span>
+          </div>
+          <div class="call-storm">Mississippi River flooding · substation work</div>
+          <div class="call-company">Delta Restoration Partners</div>
+          <div class="call-fields">
+            <div>
+              <div class="call-field-label">Staging</div>
+              <div class="call-field-value">Memphis, TN</div>
+            </div>
+            <div>
+              <div class="call-field-label">Report</div>
+              <div class="call-field-value">1200 tomorrow</div>
+            </div>
+            <div>
+              <div class="call-field-label">Pay rate</div>
+              <div class="call-field-value">2x + lodging</div>
+            </div>
+            <div>
+              <div class="call-field-label">Posted</div>
+              <div class="call-field-value">2 hours ago</div>
+            </div>
+          </div>
+          <div class="call-need">
+            Need: <span class="need-num">25</span> Linemen · vactor/tree crew bonus, rubber goods required
+          </div>
+          <a href="#signup-lineman" class="call-cta">
+            Apply via roster
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+          </a>
+        </article>
+
+      </div>
+
+      <div class="calls-disclaimer">
+        <strong>BETA</strong> · Storm Call is currently in private beta. The active call examples shown above reflect the typical format and detail of postings at launch. Sign up below to be notified when live calls begin in your region — and to be matched to standby rosters now.
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= MAP ======================= -->
+  <section class="map-section">
+    <div class="section-inner">
+      <div class="section-head">
+        <div class="section-head-left">
+          <div class="section-eyebrow">Section 02 · Coverage</div>
+          <h2 class="section-title">North America roster map</h2>
+        </div>
+        <div class="section-meta">
+          <span>15 standby rosters · all regions</span>
+        </div>
+      </div>
+
+      <div class="map-wrap">
+        <!-- Simplified continental US map. Coordinates approximate by region. -->
+        <svg class="map-svg" viewBox="0 0 980 580" xmlns="http://www.w3.org/2000/svg">
+          <!-- Stylized continental US blob -->
+          <path class="land" d="M 110 220
+            L 180 180 L 240 165 L 320 145 L 400 138 L 480 142 L 570 150 L 660 155 L 740 165
+            L 810 180 L 860 215 L 880 260 L 870 310 L 850 360 L 820 410 L 770 450
+            L 700 470 L 620 478 L 540 472 L 460 470 L 380 462 L 300 440 L 230 410
+            L 175 370 L 135 320 L 110 270 Z" />
+          <!-- Florida -->
+          <path class="land" d="M 720 410 L 740 460 L 745 510 L 760 540 L 770 510 L 760 460 L 750 420 Z" />
+          <!-- Pin dots with glow halos -->
+          <!-- Pacific Northwest -->
+          <circle class="pin-glow" cx="180" cy="220" r="14" />
+          <circle class="pin" cx="180" cy="220" r="5" />
+          <!-- Cascade -->
+          <circle class="pin-glow" cx="220" cy="200" r="14" />
+          <circle class="pin" cx="220" cy="200" r="5" />
+          <!-- Rocky Mountain -->
+          <circle class="pin-glow" cx="320" cy="280" r="14" />
+          <circle class="pin" cx="320" cy="280" r="5" />
+          <!-- Northern Plains -->
+          <circle class="pin-glow" cx="400" cy="200" r="14" />
+          <circle class="pin" cx="400" cy="200" r="5" />
+          <!-- Heartland -->
+          <circle class="pin-glow" cx="430" cy="320" r="14" />
+          <circle class="pin" cx="430" cy="320" r="5" />
+          <!-- Sun Belt -->
+          <circle class="pin-glow" cx="290" cy="380" r="14" />
+          <circle class="pin" cx="290" cy="380" r="5" />
+          <!-- Heritage Power TX -->
+          <circle class="pin-glow" cx="450" cy="430" r="14" />
+          <circle class="pin" cx="450" cy="430" r="5" />
+          <!-- Lakes Region -->
+          <circle class="pin-glow" cx="540" cy="240" r="14" />
+          <circle class="pin" cx="540" cy="240" r="5" />
+          <!-- Delta -->
+          <circle class="pin-glow" cx="540" cy="380" r="14" />
+          <circle class="pin" cx="540" cy="380" r="5" />
+          <!-- Coastal Power Gulf -->
+          <circle class="pin-glow" cx="580" cy="430" r="14" />
+          <circle class="pin" cx="580" cy="430" r="5" />
+          <!-- Atlantic Power SE -->
+          <circle class="pin-glow" cx="690" cy="340" r="14" />
+          <circle class="pin" cx="690" cy="340" r="5" />
+          <!-- Carolina Mutual -->
+          <circle class="pin-glow" cx="710" cy="310" r="14" />
+          <circle class="pin" cx="710" cy="310" r="5" />
+          <!-- Mid-Atlantic -->
+          <circle class="pin-glow" cx="720" cy="265" r="14" />
+          <circle class="pin" cx="720" cy="265" r="5" />
+          <!-- Northeast Mutual -->
+          <circle class="pin-glow" cx="780" cy="220" r="14" />
+          <circle class="pin" cx="780" cy="220" r="5" />
+          <!-- Continental Storm Network (multi-region — center) -->
+          <circle class="pin-glow" cx="490" cy="280" r="18" />
+          <circle class="pin" cx="490" cy="280" r="6" />
+        </svg>
+
+        <div class="map-legend">
+          <div class="legend-item">
+            <span class="legend-dot orange"></span>
+            <span>Standby roster · regional</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot amber"></span>
+            <span>Active storm call</span>
+          </div>
+          <div class="legend-item">
+            <span style="color: var(--text-dim);">Click any pin once you're signed up to view roster details</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= ROSTER DIRECTORY ======================= -->
+  <section id="rosters">
+    <div class="section-inner">
+      <div class="section-head">
+        <div class="section-head-left">
+          <div class="section-eyebrow">Section 03 · Permanent</div>
+          <h2 class="section-title">Roster directory</h2>
+        </div>
+        <div class="section-meta">
+          <span>Companies actively building standby rosters</span>
+        </div>
+      </div>
+
+      <div class="roster-grid">
+        <div class="roster">
+          <div class="roster-name">Atlantic Power Restoration</div>
+          <div class="roster-region">Southeast US · NC SC GA FL AL</div>
+          <div class="roster-meta">
+            <span>Roster: <strong>240+</strong></span>
+            <span>JL · Op · GM</span>
+          </div>
+        </div>
+        <div class="roster">
+          <div class="roster-name">Carolina Mutual Aid Group</div>
+          <div class="roster-region">Carolinas + Virginia</div>
+          <div class="roster-meta">
+            <span>Roster: <strong>180+</strong></span>
+            <span>JL · GM</span>
+          </div>
+        </div>
+        <div class="roster">
+          <div class="roster-name">Heartland Storm Services</div>
+          <div class="roster-region">Plains states · OK KS NE MO AR</div>
+          <div class="roster-meta">
+            <span>Roster: <strong>165+</strong></span>
+            <span>JL · Op</span>
+          </div>
+        </div>
+        <div class="roster">
+          <div class="roster-name">Coastal Power Cooperative</div>
+          <div class="roster-region">Gulf coast · TX LA MS AL FL panhandle</div>
+          <div class="roster-meta">
+            <span>Roster: <strong>200+</strong></span>
+            <span>JL · GM · Op</span>
+          </div>
+        </div>
+        <div class="roster">
+          <div class="roster-name">Delta Restoration Partners</div>
+          <div class="roster-region">Mississippi River Valley · TN MS AR LA</div>
+          <div class="roster-meta">
+            <span>Roster: <strong>140+</strong></span>
+            <span>JL · GM</span>
+          </div>
+        </div>
+        <div class="roster">
+          <div class="roster-name">Northeast Mutual Power</div>
+          <div class="roster-region">New England + NY + NJ</div>
+          <div class="roster-meta">
+            <span>Roster: <strong>190+</strong></span>
+            <span>JL · Op · GM</span>
+          </div>
+        </div>
+        <div class="roster">
+          <div class="roster-name">Pacific Northwest Storm Crew</div>
+          <div class="roster-region">WA · OR · ID</div>
+          <div class="roster-meta">
+            <span>Roster: <strong>110+</strong></span>
+            <span>JL · GM</span>
+          </div>
+        </div>
+        <div class="roster">
+          <div class="roster-name">Rocky Mountain Lineman Services</div>
+          <div class="roster-region">CO · UT · WY · MT</div>
+          <div class="roster-meta">
+            <span>Roster: <strong>95+</strong></span>
+            <span>JL · Op</span>
+          </div>
+        </div>
+        <div class="roster">
+          <div class="roster-name">Sun Belt Storm Response</div>
+          <div class="roster-region">AZ · NM · So. CA · NV</div>
+          <div class="roster-meta">
+            <span>Roster: <strong>130+</strong></span>
+            <span>JL · GM</span>
+          </div>
+        </div>
+        <div class="roster">
+          <div class="roster-name">Lakes Region Power Restoration</div>
+          <div class="roster-region">MI · WI · MN · IL · IN · OH</div>
+          <div class="roster-meta">
+            <span>Roster: <strong>175+</strong></span>
+            <span>JL · Op · GM</span>
+          </div>
+        </div>
+        <div class="roster">
+          <div class="roster-name">Mid-Atlantic Storm Cooperative</div>
+          <div class="roster-region">PA · MD · DE · VA · DC · WV</div>
+          <div class="roster-meta">
+            <span>Roster: <strong>160+</strong></span>
+            <span>JL · GM</span>
+          </div>
+        </div>
+        <div class="roster">
+          <div class="roster-name">Northern Plains Emergency Power</div>
+          <div class="roster-region">ND · SD · MT · WY</div>
+          <div class="roster-meta">
+            <span>Roster: <strong>80+</strong></span>
+            <span>JL · Op</span>
+          </div>
+        </div>
+        <div class="roster">
+          <div class="roster-name">Cascade Mutual Aid</div>
+          <div class="roster-region">PNW + Alaska</div>
+          <div class="roster-meta">
+            <span>Roster: <strong>105+</strong></span>
+            <span>JL · GM</span>
+          </div>
+        </div>
+        <div class="roster">
+          <div class="roster-name">Heritage Power Services</div>
+          <div class="roster-region">TX · OK</div>
+          <div class="roster-meta">
+            <span>Roster: <strong>120+</strong></span>
+            <span>JL · Op</span>
+          </div>
+        </div>
+        <div class="roster">
+          <div class="roster-name">Continental Storm Network</div>
+          <div class="roster-region">National · multi-region travel</div>
+          <div class="roster-meta">
+            <span>Roster: <strong>320+</strong></span>
+            <span>JL · Op · GM</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= WHY ======================= -->
+  <section style="background: var(--bg-elev); border-top: 1px solid var(--line);">
+    <div class="section-inner">
+      <div class="section-head">
+        <div class="section-head-left">
+          <div class="section-eyebrow">Section 04 · Why</div>
+          <h2 class="section-title">Why we built this</h2>
+        </div>
+      </div>
+      <div class="why-grid">
+        <div class="why-cell">
+          <div class="why-num">01</div>
+          <h3 class="why-h">Phone trees fail</h3>
+          <p class="why-p">When a hurricane hits at 2am, who's awake to answer the call? A central feed means linemen can opt in once and see every active call in their region.</p>
+        </div>
+        <div class="why-cell">
+          <div class="why-num">02</div>
+          <h3 class="why-h">Companies short-staff</h3>
+          <p class="why-p">Most storm shortages aren't from too few linemen. They're from contractors not knowing which travelers are available. We close that gap.</p>
+        </div>
+        <div class="why-cell">
+          <div class="why-num">03</div>
+          <h3 class="why-h">Free for everyone</h3>
+          <p class="why-p">No middlemen taking a cut of your hours. No subscription. No agency fees. Just a directory built by people who've been on the wrong side of a missed call.</p>
+        </div>
+        <div class="why-cell">
+          <div class="why-num">04</div>
+          <h3 class="why-h">Verified contractors</h3>
+          <p class="why-p">Every company on the directory has been vetted. No fake postings. No scams. Just IBEW signatory contractors who actually run storm rosters.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= SIGNUP ======================= -->
+  <section class="signup-section" id="signup">
+    <div class="signup-wrap">
+      <div class="section-head">
+        <div class="section-head-left">
+          <div class="section-eyebrow">Section 05 · Sign up</div>
+          <h2 class="section-title">Get on the list</h2>
+        </div>
+        <div class="section-meta">
+          <span>Beta · 48-hour response time</span>
+        </div>
+      </div>
+
+      <div class="signup-tabs">
+        <button class="signup-tab active" data-target="lineman" id="signup-lineman">For linemen</button>
+        <button class="signup-tab" data-target="company" id="signup-company">For contractors</button>
+      </div>
+
+      <!-- LINEMAN FORM -->
+      <div class="form-pane active" id="pane-lineman">
+        <div class="form-notice">
+          <svg class="form-notice-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+          <div class="form-notice-text">
+            <strong>BETA — 48hr response</strong><br>
+            Storm Call is in private beta. Submit your info and we'll match you to standby rosters in your region within 48 hours. No spam. We won't share your info with anyone you haven't applied to.
+          </div>
+        </div>
+
+        <form name="lineman-signup" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="lineman-form">
+          <input type="hidden" name="form-name" value="lineman-signup">
+          <p style="display:none;"><label>Don't fill this out: <input name="bot-field"></label></p>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="ln-name">Full name <span class="req">*</span></label>
+              <input class="form-input" type="text" name="full-name" id="ln-name" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ln-phone">Cell phone <span class="req">*</span></label>
+              <input class="form-input" type="tel" name="phone" id="ln-phone" required placeholder="(555) 555-5555">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ln-email">Email <span class="req">*</span></label>
+              <input class="form-input" type="email" name="email" id="ln-email" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ln-class">Classification <span class="req">*</span></label>
+              <select class="form-select" name="classification" id="ln-class" required>
+                <option value="">— Select —</option>
+                <option>Journeyman Lineman</option>
+                <option>Apprentice Lineman</option>
+                <option>Equipment Operator</option>
+                <option>Groundman</option>
+                <option>Foreman / GF</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ln-home">Home base (city, state) <span class="req">*</span></label>
+              <input class="form-input" type="text" name="home-base" id="ln-home" required placeholder="Columbus, OH">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ln-local">IBEW Local <span class="req">*</span></label>
+              <input class="form-input" type="text" name="ibew-local" id="ln-local" required placeholder="e.g. 1245">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ln-years">Years in trade</label>
+              <input class="form-input" type="number" name="years-experience" id="ln-years" min="0" max="50">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ln-travel">Willing to travel</label>
+              <select class="form-select" name="travel-radius" id="ln-travel">
+                <option>Anywhere in the US</option>
+                <option>Within my region only</option>
+                <option>Within 500 miles</option>
+                <option>Within 250 miles</option>
+                <option>Local only</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label class="form-label">Active certifications · Check all that apply</label>
+              <div class="form-checkboxes">
+                <label class="form-checkbox"><input type="checkbox" name="cert-cdl-a" value="yes"> CDL-A</label>
+                <label class="form-checkbox"><input type="checkbox" name="cert-cdl-b" value="yes"> CDL-B</label>
+                <label class="form-checkbox"><input type="checkbox" name="cert-osha-10" value="yes"> OSHA 10</label>
+                <label class="form-checkbox"><input type="checkbox" name="cert-osha-30" value="yes"> OSHA 30</label>
+                <label class="form-checkbox"><input type="checkbox" name="cert-climbing" value="yes"> Climbing</label>
+                <label class="form-checkbox"><input type="checkbox" name="cert-hot-stick" value="yes"> Hot stick</label>
+                <label class="form-checkbox"><input type="checkbox" name="cert-bucket" value="yes"> Bucket truck</label>
+                <label class="form-checkbox"><input type="checkbox" name="cert-digger" value="yes"> Digger derrick</label>
+                <label class="form-checkbox"><input type="checkbox" name="cert-substation" value="yes"> Substation</label>
+              </div>
+            </div>
+            <div class="form-group full">
+              <label class="form-label" for="ln-storm">Storm work experience</label>
+              <textarea class="form-textarea" name="storm-experience" id="ln-storm" placeholder="Hurricanes, ice storms, tornado response, etc. Where, when, what role."></textarea>
+            </div>
+
+            <div class="form-submit-row">
+              <p class="form-fineprint">By submitting you agree to be contacted about storm roster opportunities. We won't spam you. Unsubscribe any time. Your info is never sold.</p>
+              <button type="submit" class="form-submit-btn">Submit →</button>
+            </div>
+          </div>
+        </form>
+
+        <div class="form-success" id="lineman-success">
+          <h3>You're in.</h3>
+          <p>Thanks for signing up. We'll match you to standby rosters in your region and follow up within 48 hours.</p>
+        </div>
+      </div>
+
+      <!-- CONTRACTOR FORM -->
+      <div class="form-pane" id="pane-company">
+        <div class="form-notice">
+          <svg class="form-notice-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+          <div class="form-notice-text">
+            <strong>BETA — 48hr response</strong><br>
+            Tell us about your company and your storm roster needs. We'll review and reach out to onboard you within 48 hours. Listing on Storm Call is free for verified IBEW signatory contractors.
+          </div>
+        </div>
+
+        <form name="contractor-signup" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="contractor-form">
+          <input type="hidden" name="form-name" value="contractor-signup">
+          <p style="display:none;"><label>Don't fill this out: <input name="bot-field"></label></p>
+
+          <div class="form-grid">
+            <div class="form-group full">
+              <label class="form-label" for="co-name">Company name <span class="req">*</span></label>
+              <input class="form-input" type="text" name="company-name" id="co-name" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="co-contact">Contact name <span class="req">*</span></label>
+              <input class="form-input" type="text" name="contact-name" id="co-contact" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="co-title">Title</label>
+              <input class="form-input" type="text" name="contact-title" id="co-title" placeholder="GF, dispatcher, owner">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="co-email">Email <span class="req">*</span></label>
+              <input class="form-input" type="email" name="email" id="co-email" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="co-phone">Phone <span class="req">*</span></label>
+              <input class="form-input" type="tel" name="phone" id="co-phone" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="co-regions">Regions covered <span class="req">*</span></label>
+              <input class="form-input" type="text" name="regions-covered" id="co-regions" required placeholder="e.g. SE US, Texas, National">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="co-roster">Avg roster size</label>
+              <input class="form-input" type="text" name="roster-size" id="co-roster" placeholder="e.g. 50, 100, 200+">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="co-signatory">IBEW signatory <span class="req">*</span></label>
+              <select class="form-select" name="ibew-signatory" id="co-signatory" required>
+                <option value="">— Select —</option>
+                <option>Yes — IBEW signatory</option>
+                <option>Yes — Other union signatory</option>
+                <option>Mixed crews</option>
+                <option>Open shop</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="co-years">Years running storm rosters</label>
+              <input class="form-input" type="number" name="years-storm-rosters" id="co-years" min="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="co-website">Website</label>
+              <input class="form-input" type="url" name="website" id="co-website" placeholder="https://">
+            </div>
+            <div class="form-group full">
+              <label class="form-label" for="co-about">Brief description of your storm operations</label>
+              <textarea class="form-textarea" name="about" id="co-about" placeholder="What kind of storm work do you do? Who do you typically work for? What's your typical staging cadence?"></textarea>
+            </div>
+
+            <div class="form-submit-row">
+              <p class="form-fineprint">By submitting you agree to verification before being listed. Verified contractors will be onboarded to post calls and manage rosters at launch.</p>
+              <button type="submit" class="form-submit-btn">Submit →</button>
+            </div>
+          </div>
+        </form>
+
+        <div class="form-success" id="contractor-success">
+          <h3>Got it.</h3>
+          <p>Thanks for the submission. We'll review and reach out within 48 hours to start onboarding.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">STORM CALL · BETA</div>
+    <div class="footer-meta">Built by linemen, for linemen · 2026</div>
+  </div>
+</footer>
+
+<script>
+  // Tab switching
+  document.querySelectorAll('.signup-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.signup-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.form-pane').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('pane-' + tab.dataset.target).classList.add('active');
+    });
+  });
+
+  // Quick-link CTAs scroll to signup and switch tabs
+  document.querySelectorAll('a[href="#signup-lineman"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelector('[data-target="lineman"]').click();
+      document.getElementById('signup').scrollIntoView({behavior: 'smooth', block: 'start'});
+    });
+  });
+  document.querySelectorAll('a[href="#signup-company"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelector('[data-target="company"]').click();
+      document.getElementById('signup').scrollIntoView({behavior: 'smooth', block: 'start'});
+    });
+  });
+
+  // Form submission — uses native HTML5 validation, then submits to Netlify
+  // Netlify intercepts the POST and emails us. We show a success message either via
+  // their thank-you redirect or by intercepting and AJAX-posting (more reliable for SPA-feel).
+  function handleSubmit(formId, successId) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      const data = new FormData(form);
+      try {
+        await fetch('/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams(data).toString(),
+        });
+        form.style.display = 'none';
+        document.getElementById(successId).classList.add('show');
+        document.getElementById(successId).scrollIntoView({behavior:'smooth', block:'center'});
+      } catch (err) {
+        alert('Submission failed. Please try again or email us directly.');
+      }
+    });
+  }
+  handleSubmit('lineman-form', 'lineman-success');
+  handleSubmit('contractor-form', 'contractor-success');
+</script>
+
+</body>
+</html>
