@@ -82,8 +82,8 @@ header.scrolled{background:rgba(8,5,3,.55);backdrop-filter:blur(20px) saturate(1
 .wire{display:block;position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .wire path{fill:none;vector-effect:non-scaling-stroke}
 .wire .wire-base{stroke:rgba(255,135,55,.42);stroke-width:1.6;filter:drop-shadow(0 0 3px rgba(255,106,13,.4))}
-.wire .wire-pulse{stroke:var(--amber);stroke-width:2.4;stroke-linecap:round;filter:drop-shadow(0 0 5px var(--spark)) drop-shadow(0 0 13px var(--spark));stroke-dasharray:7 1000;stroke-dashoffset:0;animation:none}.wire.live .wire-pulse{animation:flowpulse 3s linear forwards}.wire.live .wire-pulse.two{animation:flowpulse 3s linear .5s forwards}
-.wire .wire-pulse.two{opacity:.75}
+.wire .wire-pulse{stroke:var(--amber);stroke-width:2.6;stroke-linecap:round;filter:drop-shadow(0 0 5px var(--spark)) drop-shadow(0 0 13px var(--spark));stroke-dasharray:34 966;stroke-dashoffset:0;animation:ringspin 3.4s linear infinite}@keyframes ringspin{to{stroke-dashoffset:-1000}}
+.wire .wire-pulse.two{opacity:0}
 @keyframes flowpulse{to{stroke-dashoffset:-1007}}
 .wire circle{fill:var(--amber);filter:drop-shadow(0 0 6px var(--spark))}
 .flow>section,.flow>div{position:relative;z-index:1}
@@ -422,15 +422,10 @@ function wires(){
     if(!ph){svg.querySelectorAll('path').forEach(function(p){p.setAttribute('d','')});svg.querySelectorAll('circle').forEach(function(n){n.setAttribute('cx',-99);n.setAttribute('cy',-99)});return;}
     var pr=ph.getBoundingClientRect(),fb=flow.getBoundingClientRect();
     var pcx=pr.left-fb.left+pr.width/2,pcy=pr.top-fb.top+pr.height/2;
-    var loopR=pr.width/2+(mob?13:18),topY=Math.max(0,pcy-loopR);
-    var d='M '+pcx.toFixed(1)+' 0';
-    for(var y=0;y<=topY;y+=14){var t=topY>0?y/topY:1;var wob=(mob?8:26)*Math.sin(y/95)*(1-t);d+=' L '+(pcx+wob).toFixed(1)+' '+y.toFixed(1);}
-    d+=' L '+pcx.toFixed(1)+' '+topY.toFixed(1);
-    d+=' A '+loopR.toFixed(1)+' '+loopR.toFixed(1)+' 0 0 1 '+pcx.toFixed(1)+' '+(pcy+loopR).toFixed(1);
-    d+=' A '+loopR.toFixed(1)+' '+loopR.toFixed(1)+' 0 0 1 '+pcx.toFixed(1)+' '+topY.toFixed(1);
+    var loopR=pr.width/2+(mob?12:16),top=(pcy-loopR).toFixed(1);
+    var d='M '+pcx.toFixed(1)+' '+top+' A '+loopR.toFixed(1)+' '+loopR.toFixed(1)+' 0 0 1 '+pcx.toFixed(1)+' '+(pcy+loopR).toFixed(1)+' A '+loopR.toFixed(1)+' '+loopR.toFixed(1)+' 0 0 1 '+pcx.toFixed(1)+' '+top+' Z';
     svg.querySelectorAll('path').forEach(function(p){p.setAttribute('d',d)});
-    svg.querySelectorAll('circle').forEach(function(n,i){var ang=-Math.PI/2+i*(2*Math.PI/3);n.setAttribute('cx',(pcx+loopR*Math.cos(ang)).toFixed(1));n.setAttribute('cy',(pcy+loopR*Math.sin(ang)).toFixed(1));});
-    if(!svg.dataset.lo){svg.dataset.lo='1';new IntersectionObserver(function(en,ob){en.forEach(function(x){if(x.isIntersecting){svg.classList.add('live');ob.disconnect();}})},{threshold:0.5}).observe(ph);}
+    svg.querySelectorAll('circle').forEach(function(n){n.setAttribute('cx',-99);n.setAttribute('cy',-99)});
   });
 }
 var VIEWS=['home','union-pathways','spark-the-trade','contact','social'];
