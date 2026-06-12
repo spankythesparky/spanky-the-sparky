@@ -71,7 +71,7 @@ header.scrolled{background:rgba(8,5,3,.55);backdrop-filter:blur(20px) saturate(1
 .hero .lead{font-size:clamp(16px,1.9vw,19px);color:var(--muted);max-width:52ch;margin:0 auto 36px}
 .cta-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
 .scrollcue{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted2);display:flex;flex-direction:column;align-items:center;gap:9px}
-.scrollcue::after{content:"";width:1px;height:36px;background:linear-gradient(var(--spark),transparent);animation:drop 1.9s ease-in-out infinite}
+.scrollcue::after{display:none}
 @keyframes drop{0%{opacity:0;transform:scaleY(.3)}50%{opacity:1}100%{opacity:0;transform:translateY(14px) scaleY(.3)}}
 .phero{position:relative;padding:160px 28px 40px;text-align:center}
 .phero::before{content:"";position:absolute;top:90px;left:50%;width:560px;height:480px;transform:translateX(-50%);background:radial-gradient(circle,rgba(255,120,30,.26),transparent 62%);filter:blur(10px);z-index:-1}
@@ -79,7 +79,7 @@ header.scrolled{background:rgba(8,5,3,.55);backdrop-filter:blur(20px) saturate(1
 .phero h1{font-weight:600;font-size:clamp(30px,5vw,56px);max-width:18ch;margin:0 auto 18px}
 .phero .lead{color:var(--muted);max-width:56ch;margin:0 auto 32px;font-size:18px}
 .flow{position:relative}
-.wire{display:block;position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.wire{display:block;position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
 .wire path{fill:none;vector-effect:non-scaling-stroke}
 .wire .wire-base{stroke:rgba(255,135,55,.42);stroke-width:1.6;filter:drop-shadow(0 0 3px rgba(255,106,13,.4))}
 .wire .wire-pulse{stroke:var(--amber);stroke-width:2.6;stroke-linecap:round;filter:drop-shadow(0 0 5px var(--spark)) drop-shadow(0 0 13px var(--spark));stroke-dasharray:34 966;stroke-dashoffset:0;animation:ringspin 3.4s linear infinite}@keyframes ringspin{to{stroke-dashoffset:-1000}}
@@ -206,7 +206,7 @@ footer{margin-top:30px;padding:64px 0 34px;position:relative;z-index:1;border-to
 .scard .sgo{margin-left:auto;flex:none;color:var(--muted);transition:.3s}
 .scard:hover .sgo{color:var(--spark);transform:translateX(4px)}
 @media(max-width:620px){.socials{grid-template-columns:1fr}}
-.sstats{display:flex;justify-content:center;gap:clamp(34px,7vw,72px);flex-wrap:wrap;margin:4px auto 30px;max-width:760px}.sstat{text-align:center}.snum{display:block;font-weight:700;font-size:clamp(40px,7vw,58px);line-height:1;letter-spacing:-.01em}.slab{display:block;margin-top:10px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}.founder{display:block;width:200px;height:auto;margin:46px auto 30px;filter:drop-shadow(0 10px 24px rgba(0,0,0,.4))}</style><noscript><style>.reveal{opacity:1!important;transform:none!important}.view{display:block!important}</style></noscript></head>
+.sstats{display:flex;justify-content:center;gap:clamp(34px,7vw,72px);flex-wrap:wrap;margin:4px auto 30px;max-width:760px}.sstat{text-align:center}.snum{display:block;font-weight:700;font-size:clamp(40px,7vw,58px);line-height:1;letter-spacing:-.01em}.slab{display:block;margin-top:10px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}.founder{display:block;width:230px;height:auto;margin:46px auto 30px;filter:drop-shadow(0 10px 24px rgba(0,0,0,.4))}</style><noscript><style>.reveal{opacity:1!important;transform:none!important}.view{display:block!important}</style></noscript></head>
 <body><div class="bg"><span class="b1"></span><span class="b2"></span><span class="b3"></span></div><div class="grain"></div>
 <header id="hdr"><div class="wrap nav">
   <a href="/" data-view="home" class="brand" aria-label="Spanky the Sparky home"><span class="markimg" role="img" aria-label="Spanky the Sparky"></span><b>SPANKY<i>.</i>THE<i>.</i>SPARKY</b></a>
@@ -422,9 +422,12 @@ function wires(){
     if(!ph){svg.querySelectorAll('path').forEach(function(p){p.setAttribute('d','')});svg.querySelectorAll('circle').forEach(function(n){n.setAttribute('cx',-99);n.setAttribute('cy',-99)});return;}
     var pr=ph.getBoundingClientRect(),fb=flow.getBoundingClientRect();
     var pcx=pr.left-fb.left+pr.width/2,pcy=pr.top-fb.top+pr.height/2;
-    var loopR=pr.width/2+(mob?12:16),top=(pcy-loopR).toFixed(1);
-    var d='M '+pcx.toFixed(1)+' '+top+' A '+loopR.toFixed(1)+' '+loopR.toFixed(1)+' 0 0 1 '+pcx.toFixed(1)+' '+(pcy+loopR).toFixed(1)+' A '+loopR.toFixed(1)+' '+loopR.toFixed(1)+' 0 0 1 '+pcx.toFixed(1)+' '+top+' Z';
-    svg.querySelectorAll('path').forEach(function(p){p.setAttribute('d',d)});
+    var loopR=pr.width/2+(mob?6:7),topY=(pcy-loopR).toFixed(1);
+    var ring=' A '+loopR.toFixed(1)+' '+loopR.toFixed(1)+' 0 0 1 '+pcx.toFixed(1)+' '+(pcy+loopR).toFixed(1)+' A '+loopR.toFixed(1)+' '+loopR.toFixed(1)+' 0 0 1 '+pcx.toFixed(1)+' '+topY;
+    var ringD='M '+pcx.toFixed(1)+' '+topY+ring+' Z';
+    var baseD='M '+pcx.toFixed(1)+' -56 L '+pcx.toFixed(1)+' '+topY+ring;
+    var b=svg.querySelector('.wire-base');if(b)b.setAttribute('d',baseD);
+    svg.querySelectorAll('.wire-pulse').forEach(function(p){p.setAttribute('d',ringD)});
     svg.querySelectorAll('circle').forEach(function(n){n.setAttribute('cx',-99);n.setAttribute('cy',-99)});
   });
 }
