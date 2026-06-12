@@ -79,11 +79,11 @@ header.scrolled{background:rgba(8,5,3,.55);backdrop-filter:blur(20px) saturate(1
 .phero h1{font-weight:600;font-size:clamp(30px,5vw,56px);max-width:18ch;margin:0 auto 18px}
 .phero .lead{color:var(--muted);max-width:56ch;margin:0 auto 32px;font-size:18px}
 .flow{position:relative}
-.wire{display:none}
+.wire{display:block;position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .wire path{fill:none;vector-effect:non-scaling-stroke}
-.wire .wire-base{stroke:rgba(255,120,45,.16);stroke-width:1.4}
-.wire .wire-pulse{stroke:var(--amber);stroke-width:2.4;stroke-linecap:round;filter:drop-shadow(0 0 5px var(--spark)) drop-shadow(0 0 13px var(--spark));stroke-dasharray:7 1000;stroke-dashoffset:0;animation:flowpulse 6s linear infinite}
-.wire .wire-pulse.two{animation-delay:3s;opacity:.8}
+.wire .wire-base{stroke:rgba(255,135,55,.42);stroke-width:1.6;filter:drop-shadow(0 0 3px rgba(255,106,13,.4))}
+.wire .wire-pulse{stroke:var(--amber);stroke-width:2.4;stroke-linecap:round;filter:drop-shadow(0 0 5px var(--spark)) drop-shadow(0 0 13px var(--spark));stroke-dasharray:7 1000;stroke-dashoffset:0;animation:none}.wire.live .wire-pulse{animation:flowpulse 3s linear forwards}.wire.live .wire-pulse.two{animation:flowpulse 3s linear .5s forwards}
+.wire .wire-pulse.two{opacity:.75}
 @keyframes flowpulse{to{stroke-dashoffset:-1007}}
 .wire circle{fill:var(--amber);filter:drop-shadow(0 0 6px var(--spark))}
 .flow>section,.flow>div{position:relative;z-index:1}
@@ -206,7 +206,7 @@ footer{margin-top:30px;padding:64px 0 34px;position:relative;z-index:1;border-to
 .scard .sgo{margin-left:auto;flex:none;color:var(--muted);transition:.3s}
 .scard:hover .sgo{color:var(--spark);transform:translateX(4px)}
 @media(max-width:620px){.socials{grid-template-columns:1fr}}
-</style><noscript><style>.reveal{opacity:1!important;transform:none!important}.view{display:block!important}.sstats{display:flex;justify-content:center;gap:clamp(34px,7vw,72px);flex-wrap:wrap;margin:4px auto 30px;max-width:760px}.sstat{text-align:center}.snum{display:block;font-weight:700;font-size:clamp(40px,7vw,58px);line-height:1;letter-spacing:-.01em}.slab{display:block;margin-top:10px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}.founder{display:block;width:200px;height:auto;margin:0 auto 28px;filter:drop-shadow(0 10px 24px rgba(0,0,0,.4))}</style></noscript></head>
+</style><noscript><style>.reveal{opacity:1!important;transform:none!important}.view{display:block!important}.sstats{display:flex;justify-content:center;gap:clamp(34px,7vw,72px);flex-wrap:wrap;margin:4px auto 30px;max-width:760px}.sstat{text-align:center}.snum{display:block;font-weight:700;font-size:clamp(40px,7vw,58px);line-height:1;letter-spacing:-.01em}.slab{display:block;margin-top:10px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}.founder{display:block;width:200px;height:auto;margin:46px auto 30px;filter:drop-shadow(0 10px 24px rgba(0,0,0,.4))}</style></noscript></head>
 <body><div class="bg"><span class="b1"></span><span class="b2"></span><span class="b3"></span></div><div class="grain"></div>
 <header id="hdr"><div class="wrap nav">
   <a href="/" data-view="home" class="brand" aria-label="Spanky the Sparky home"><span class="markimg" role="img" aria-label="Spanky the Sparky"></span><b>SPANKY<i>.</i>THE<i>.</i>SPARKY</b></a>
@@ -418,11 +418,19 @@ function wires(){
     var svg=flow.querySelector('.wire'); if(!svg)return;
     var W=flow.clientWidth,H=flow.scrollHeight; if(!H)return;
     svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.setAttribute('width',W);svg.setAttribute('height',H);
-    var mob=W<760;var cx=mob?28:W*0.5;var amp=mob?14:Math.min(W*0.13,165);
-    var d='M '+cx.toFixed(1)+' 0';
-    for(var y=0;y<=H;y+=20){var x=cx+amp*Math.sin(y/300);d+=' L '+x.toFixed(1)+' '+y;}
+    var ph=flow.querySelector('.founder');var mob=W<760;
+    if(!ph){svg.querySelectorAll('path').forEach(function(p){p.setAttribute('d','')});svg.querySelectorAll('circle').forEach(function(n){n.setAttribute('cx',-99);n.setAttribute('cy',-99)});return;}
+    var pr=ph.getBoundingClientRect(),fb=flow.getBoundingClientRect();
+    var pcx=pr.left-fb.left+pr.width/2,pcy=pr.top-fb.top+pr.height/2;
+    var loopR=pr.width/2+(mob?13:18),topY=Math.max(0,pcy-loopR);
+    var d='M '+pcx.toFixed(1)+' 0';
+    for(var y=0;y<=topY;y+=14){var t=topY>0?y/topY:1;var wob=(mob?8:26)*Math.sin(y/95)*(1-t);d+=' L '+(pcx+wob).toFixed(1)+' '+y.toFixed(1);}
+    d+=' L '+pcx.toFixed(1)+' '+topY.toFixed(1);
+    d+=' A '+loopR.toFixed(1)+' '+loopR.toFixed(1)+' 0 0 1 '+pcx.toFixed(1)+' '+(pcy+loopR).toFixed(1);
+    d+=' A '+loopR.toFixed(1)+' '+loopR.toFixed(1)+' 0 0 1 '+pcx.toFixed(1)+' '+topY.toFixed(1);
     svg.querySelectorAll('path').forEach(function(p){p.setAttribute('d',d)});
-    svg.querySelectorAll('circle').forEach(function(n,i){var fr=(i+1)/4;var y=H*fr;var x=cx+amp*Math.sin(y/300);n.setAttribute('cx',x);n.setAttribute('cy',y);});
+    svg.querySelectorAll('circle').forEach(function(n,i){var ang=-Math.PI/2+i*(2*Math.PI/3);n.setAttribute('cx',(pcx+loopR*Math.cos(ang)).toFixed(1));n.setAttribute('cy',(pcy+loopR*Math.sin(ang)).toFixed(1));});
+    if(!svg.dataset.lo){svg.dataset.lo='1';new IntersectionObserver(function(en,ob){en.forEach(function(x){if(x.isIntersecting){svg.classList.add('live');ob.disconnect();}})},{threshold:0.5}).observe(ph);}
   });
 }
 var VIEWS=['home','union-pathways','spark-the-trade','contact','social'];
